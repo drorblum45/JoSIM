@@ -56,17 +56,46 @@ pipeline {
                 }
             }
         }
+        
+        stage('Build Project') {
+            steps {
+                echo "=== BUILDING PROJECT ==="
+                sh '''
+                    mkdir -p build
+                    cd build
+                    cmake ..
+                    cmake --build . --config Release
+                '''
+            }
+        }
+        
+        stage('Run Simulation') {
+            steps {
+                echo "=== RUNNING SIMULATION ==="
+                sh '''
+                    cd build
+                    ./josim-cli -o ./ex_jtl_basic.csv ../test/ex_jtl_basic.cir -V 1
+                '''
+            }
+        }
+        
+        stage('Validate Output') {
+            steps {
+                echo "=== VALIDATING OUTPUT ==="
+                sh 'python3 scripts/validate_csv.py build/ex_jtl_basic.csv'
+            }
+        }
     }
     
     post {
         always {
-            echo "Pipeline completed for JoSIM repository"
+            archiveArtifacts artifacts: 'build/ex_jtl_basic.csv', allowEmptyArchive: true
         }
         success {
-            echo "Hello pipeline executed successfully!"
+            echo "Build and simulation pipeline executed successfully!"
         }
         failure {
-            echo "Pipeline failed - but still saying hello!"
+            echo "Pipeline failed - check logs for details"
         }
     }
 }
