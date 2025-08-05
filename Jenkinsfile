@@ -2,13 +2,26 @@ pipeline {
     agent any
     
     triggers {
-        // Poll SCM every minute for changes
+        // Poll SCM every minute for changes.
         pollSCM('* * * * *')
-        // Alternative: Use webhook trigger (recommended)
-        // githubPush()
     }
     
     stages {
+        stage('Debug Branch Info') {
+            steps {
+                script {
+                    echo "=== BRANCH DEBUG INFO ==="
+                    echo "Current branch: ${env.GIT_BRANCH}"
+                    echo "Git commit: ${env.GIT_COMMIT}"
+                    echo "Build cause: ${currentBuild.getBuildCauses()}"
+                    
+                    // Show all branches
+                    sh 'git branch -a'
+                    sh 'git remote show origin'
+                }
+            }
+        }
+        
         stage('Hello on Commit') {
             steps {
                 script {
@@ -21,22 +34,25 @@ pipeline {
             }
         }
         
-        stage('Optional: Build Info') {
+        stage('Build Info') {
             steps {
                 script {
-                    // Get commit message and author
-                    def commitMessage = sh(
-                        script: 'git log -1 --pretty=format:"%s"',
-                        returnStdout: true
-                    ).trim()
-                    
-                    def commitAuthor = sh(
-                        script: 'git log -1 --pretty=format:"%an"',
-                        returnStdout: true
-                    ).trim()
-                    
-                    echo "Commit Message: ${commitMessage}"
-                    echo "Author: ${commitAuthor}"
+                    try {
+                        def commitMessage = sh(
+                            script: 'git log -1 --pretty=format:"%s"',
+                            returnStdout: true
+                        ).trim()
+                        
+                        def commitAuthor = sh(
+                            script: 'git log -1 --pretty=format:"%an"',
+                            returnStdout: true
+                        ).trim()
+                        
+                        echo "Commit Message: ${commitMessage}"
+                        echo "Author: ${commitAuthor}"
+                    } catch (Exception e) {
+                        echo "Could not get git info: ${e.getMessage()}"
+                    }
                 }
             }
         }
