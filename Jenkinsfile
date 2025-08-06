@@ -7,32 +7,6 @@ pipeline {
     }
     
     stages {
-        stage('Debug Branch Info') {
-            steps {
-                script {
-                    echo "=== BRANCH DEBUG INFO ==="
-                    echo "Current branch: ${env.GIT_BRANCH}"
-                    echo "Git commit: ${env.GIT_COMMIT}"
-                    echo "Build cause: ${currentBuild.getBuildCauses()}"
-                    
-                    // Show all branches
-                    sh 'git branch -a'
-                    sh 'git remote show origin'
-                }
-            }
-        }
-        
-        stage('Hello on Commit') {
-            steps {
-                script {
-                    echo "Hello! New commit detected in JoSIM repository"
-                    echo "Commit: ${env.GIT_COMMIT}"
-                    echo "Branch: ${env.GIT_BRANCH}"
-                    echo "Build Number: ${env.BUILD_NUMBER}"
-                    echo "Timestamp: ${new Date()}"
-                }
-            }
-        }
         
         stage('Build Info') {
             steps {
@@ -61,6 +35,9 @@ pipeline {
             steps {
                 echo "=== BUILDING PROJECT ==="
                 sh '''
+                    # Set PATH to include common locations for Homebrew
+                    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+                    
                     mkdir -p build
                     cd build
                     cmake ..
