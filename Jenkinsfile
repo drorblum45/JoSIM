@@ -59,7 +59,7 @@ pipeline {
         stage('Validate Output') {
             steps {
                 echo "=== VALIDATING OUTPUT ==="
-                sh 'python3 scripts/validate_csv.py build/ex_jtl_basic.csv'
+                sh 'python3 scripts/validate_csv.py build/ex_jtl_basic.csv --expected-value 6.283185 --tolerance 0.1'
             }
         }
     }

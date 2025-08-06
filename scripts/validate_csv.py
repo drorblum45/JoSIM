@@ -1,24 +1,12 @@
 #!/usr/bin/env python3
-"""
-CSV validation script for JoSIM simulation output.
-Checks if the last line of the CSV file contains only positive numeric values.
-"""
-
 import csv
 import sys
 import os
 import argparse
+import math
 
-def validate_csv_last_line(csv_file_path):
-    """
-    Validate that the last line of a CSV file contains only positive numeric values.
-    
-    Args:
-        csv_file_path (str): Path to the CSV file to validate
-        
-    Returns:
-        bool: True if validation passes, False otherwise
-    """
+def validate_B0_end_value(csv_file_path, expected_value=2 * math.pi, tolerance=0.3):
+
     if not os.path.exists(csv_file_path):
         print(f'Error: CSV file not found: {csv_file_path}')
         return False
@@ -30,32 +18,24 @@ def validate_csv_last_line(csv_file_path):
                 print('Error: CSV file is empty')
                 return False
             
-            last_line = lines[-1]
-            print(f'Last line values: {last_line}')
-            
-            # Extract numeric values from last line
-            numeric_values = []
-            for value in last_line:
-                try:
-                    num_val = float(value)
-                    numeric_values.append(num_val)
-                except ValueError:
-                    continue  # Skip non-numeric values
-            
-            if not numeric_values:
-                print('Error: No numeric values found in last line')
+            # Find B01 column index
+            header = lines[0]
+            b01_index = next((i for i, col in enumerate(header) if col.strip().upper() == 'B01'), None)
+
+            if b01_index is None:
+                print(f'Error: B01 column not found in {header}')
                 return False
-            
-            positive_values = [v for v in numeric_values if v > 0]
-            print(f'Found {len(positive_values)} positive values out of {len(numeric_values)} numeric values')
-            
-            if len(positive_values) == len(numeric_values):
-                print('SUCCESS: All numeric values in last line are positive')
+
+            # Get B01 value from last line
+            b01_value = float(lines[-1][b01_index])
+
+            print(f'B01 value: {b01_value:.6f}, expected value: {expected_value:.6f} ± {tolerance}')
+
+            if abs(b01_value - expected_value) <= tolerance:
+                print('SUCCESS: B01 value is within acceptable range')
                 return True
             else:
-                print(f'FAILURE: Only {len(positive_values)}/{len(numeric_values)} values are positive')
-                negative_values = [v for v in numeric_values if v <= 0]
-                print(f'Non-positive values: {negative_values}')
+                print('FAILURE: B01 value is outside acceptable range')
                 return False
                 
     except Exception as e:
@@ -65,8 +45,10 @@ def validate_csv_last_line(csv_file_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Validate CSV simulation output')
     parser.add_argument('csv_file', help='Path to the CSV file to validate')
-    
+    parser.add_argument('--expected-value', type=float, default=2 * math.pi, help='Expected end value for B0')
+    parser.add_argument('--tolerance', type=float, default=0.3, help='Tolerance for validation')
+
     args = parser.parse_args()
-    
-    success = validate_csv_last_line(args.csv_file)
+
+    success = validate_B0_end_value(args.csv_file, args.expected_value, args.tolerance)
     sys.exit(0 if success else 1)
