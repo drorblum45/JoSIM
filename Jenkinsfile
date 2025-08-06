@@ -40,7 +40,7 @@ pipeline {
                     
                     mkdir -p build
                     cd build
-                    cmake ..
+                    cmake .. -DCMAKE_MESSAGE_LOG_LEVEL=ERROR
                     cmake --build . --config Release
                 '''
             }
