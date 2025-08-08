@@ -25,11 +25,11 @@ def validate_csv(csv_file_path, arg_name='B01', expected_value=2 * math.pi, tole
                 print(f'Error: {arg_name} column not found in {header}')
                 return False
 
-            expected_value = float(lines[-1][expected_value_index])
+            value = float(lines[-1][expected_value_index])
 
-            print(f'{arg_name} value: {expected_value:.6f}, expected value: {expected_value:.6f} ± {tolerance}')
+            print(f'{arg_name} value: {value:.6f}, expected value: {expected_value:.6f} ± {tolerance}')
 
-            if abs(expected_value - expected_value) <= tolerance:
+            if abs(expected_value - value) <= tolerance:
                 print(f'SUCCESS: {arg_name} value is within acceptable range')
                 return True
             else:
