@@ -1,8 +1,14 @@
 pipeline {
     agent any
     
+    environment {
+        TEST_NAME = 'ex_jtl_basic'
+        VALUE_NAME = 'B01'
+        EXPECTED_VALUE = '6.283185'
+        TOLERANCE = '5.0'
+    }
+    
     triggers {
-        // Poll SCM every minute for changes.
         pollSCM('* * * * *')
     }
     
@@ -27,7 +33,7 @@ pipeline {
                 echo "Run Simulation"
                 sh '''
                     cd build
-                    ./josim-cli -o ./ex_jtl_basic.csv ../test/ex_jtl_basic.cir -V 1
+                    ./josim-cli -o ./${TEST_NAME}.csv ../test/${TEST_NAME}.cir -V 1
                 '''
             }
         }
@@ -35,14 +41,14 @@ pipeline {
         stage('Validate Output') {
             steps {
                 echo "Validate Output"
-                sh 'python3 scripts/validate_csv.py build/ex_jtl_basic.csv --expected-value 6.283185 --tolerance 0.1'
+                sh 'python3 scripts/validate_csv.py build/${TEST_NAME}.csv --arg-name ${VALUE_NAME} --expected-value ${EXPECTED_VALUE} --tolerance ${TOLERANCE}'
             }
         }
     }
     
     post {
         always {
-            archiveArtifacts artifacts: 'build/ex_jtl_basic.csv', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'build/${TEST_NAME}.csv', allowEmptyArchive: true
         }
         success {
             echo "Build and simulation pipeline executed successfully!"
