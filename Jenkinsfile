@@ -7,33 +7,9 @@ pipeline {
     }
     
     stages {
-        
-        stage('Build Info') {
-            steps {
-                script {
-                    try {
-                        def commitMessage = sh(
-                            script: 'git log -1 --pretty=format:"%s"',
-                            returnStdout: true
-                        ).trim()
-                        
-                        def commitAuthor = sh(
-                            script: 'git log -1 --pretty=format:"%an"',
-                            returnStdout: true
-                        ).trim()
-                        
-                        echo "Commit Message: ${commitMessage}"
-                        echo "Author: ${commitAuthor}"
-                    } catch (Exception e) {
-                        echo "Could not get git info: ${e.getMessage()}"
-                    }
-                }
-            }
-        }
-        
         stage('Build Project') {
             steps {
-                echo "=== BUILDING PROJECT ==="
+                echo "Build Project"
                 sh '''
                     # Set PATH to include common locations for Homebrew
                     export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
@@ -48,7 +24,7 @@ pipeline {
         
         stage('Run Simulation') {
             steps {
-                echo "=== RUNNING SIMULATION ==="
+                echo "Run Simulation"
                 sh '''
                     cd build
                     ./josim-cli -o ./ex_jtl_basic.csv ../test/ex_jtl_basic.cir -V 1
@@ -58,7 +34,7 @@ pipeline {
         
         stage('Validate Output') {
             steps {
-                echo "=== VALIDATING OUTPUT ==="
+                echo "Validate Output"
                 sh 'python3 scripts/validate_csv.py build/ex_jtl_basic.csv --expected-value 6.283185 --tolerance 0.1'
             }
         }

@@ -18,20 +18,18 @@ def validate_csv(csv_file_path, arg_name='B01', expected_value=2 * math.pi, tole
                 print('Error: CSV file is empty')
                 return False
             
-            # Find B01 column index
             header = lines[0]
-            b01_index = next((i for i, col in enumerate(header) if arg_name in col.strip().upper()), None)
+            expected_value_index = next((i for i, col in enumerate(header) if arg_name in col.strip().upper()), None)
 
-            if b01_index is None:
+            if expected_value_index is None:
                 print(f'Error: {arg_name} column not found in {header}')
                 return False
 
-            # Get B01 value from last line
-            b01_value = float(lines[-1][b01_index])
+            expected_value = float(lines[-1][expected_value_index])
 
-            print(f'{arg_name} value: {b01_value:.6f}, expected value: {expected_value:.6f} ± {tolerance}')
+            print(f'{arg_name} value: {expected_value:.6f}, expected value: {expected_value:.6f} ± {tolerance}')
 
-            if abs(b01_value - expected_value) <= tolerance:
+            if abs(expected_value - expected_value) <= tolerance:
                 print(f'SUCCESS: {arg_name} value is within acceptable range')
                 return True
             else:
@@ -46,7 +44,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Validate CSV simulation output')
     parser.add_argument('csv_file', help='Path to the CSV file to validate')
     parser.add_argument('--arg-name', type=str, default='B01', help='Name of the argument to validate')
-    parser.add_argument('--expected-value', type=float, default=2 * math.pi, help='Expected end value for B0')
+    parser.add_argument('--expected-value', type=float, default=2 * math.pi, help='Expected end value for the argument')
     parser.add_argument('--tolerance', type=float, default=0.3, help='Tolerance for validation')
 
     args = parser.parse_args()
